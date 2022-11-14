@@ -287,9 +287,13 @@ def call_manager(params):
     if params['mode']=='snps' or params['mode']=='all':
         output_files['snps']=os.path.join(params['vcf_path'],'%s.snps.phased.vcf.gz' %params['prefix'])
 
+        # Make a file out of phased_snp_files_list list
+        with open('tmp_psfl', 'w') as fo:
+            for psfl in phased_snp_files_list:
+                fo.write(psfl + '\n')
         phased_snps_files=' '.join(phased_snp_files_list)
-        
-        run_cmd('bcftools concat %s --threads %d|bgziptabix %s' %(phased_snps_files, params['cpu'], output_files['snps']))
+        # Read from file instead of from shell
+        run_cmd('bcftools concat -f tmp_psfl --threads %d|bgziptabix %s' %(params['cpu'], output_files['snps']))
         
     if params['mode']=='indels' or params['mode']=='all':
         raw_indel_vcf=os.path.join(params['intermediate_indel_files_dir'],'%s.raw.indel.vcf' %params['prefix'])
